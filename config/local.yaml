@@ -1,0 +1,76 @@
+# QARobo Pipeline Configuration - DeepSeek 示例
+# 机器人管道配置文件 - 使用 DeepSeek LLM 和 Deepgram TTS
+
+# Transport 配置
+transport:
+  type: "local_audio"
+  params:
+    audio_in_enabled: true
+    audio_out_enabled: true
+    # input_device_index: 1
+    # output_device_index: None
+    # VAD 配置
+    vad:
+      sample_rate: 16000
+      stop_secs: 0.2
+
+# STT (Speech-to-Text) 配置
+stt:
+  type: "whisper"
+  params:
+    model: "G:/models/faster-whisper-base"
+    language: "zh"
+
+# LLM 配置 - 使用 DeepSeek
+llm:
+  type: "deepseek"
+  params:
+    api_key: "${oc.env:DEEPSEEK_API_KEY}"
+    model: "deepseek-chat"
+
+# TTS (Text-to-Speech) 配置 - 使用 Deepgram
+tts:
+  type: "kokoro"  # 可选: kokoro, deepgram
+  params:
+    # Kokoro 配置
+    model_name: "G:/models/Kokoro-82M-v1.1-zh"
+    voice: "zf_001"
+    use_speed_adjustment: false
+
+# 唤醒词配置
+wake_check:
+  enabled: true
+  wake_words:
+    - "你好"
+    - "你好, 小白"
+  idle_words:
+    - "再見"
+    - "拜拜"
+    - "拜拜了"
+    - "拜拜了您"
+  audio:
+    wake_sound: "src/sync/data/wake.wav"
+    idle_sound: "src/sync/data/idle.wav"
+    volume: 0.8
+
+# 系统提示词配置
+system_prompt: >
+  你是一个有帮助的AI助手。
+  你的目标是以简洁的方式展示你的能力。
+  你的输出会被转换为语音，所以不要在答案中包含特殊字符。
+  以创造性和有帮助的方式回应用户所说的话。
+
+# 欢迎消息配置
+welcome_message: "请向用户介绍你自己。"
+
+# Pipeline 配置
+pipeline:
+  enable_metrics: true
+  enable_usage_metrics: true
+  idle_timeout_secs: 300
+
+# 日志配置
+logging:
+  level: "DEBUG"
+  log_dir: "logs"
+

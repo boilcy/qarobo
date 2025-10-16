@@ -1,0 +1,92 @@
+# QARobo Pipeline Configuration
+# 机器人管道配置文件
+
+# Transport 配置
+transport:
+  type: "local_audio"
+  params:
+    audio_in_enabled: true
+    audio_out_enabled: true
+    input_device_index: 1
+    # VAD 配置
+    vad:
+      sample_rate: 16000
+      stop_secs: 0.2
+
+# STT (Speech-to-Text) 配置
+stt:
+  type: "whisper"  # 可选: whisper, deepgram
+  params:
+    model: "G:/models/faster-whisper-base"
+    language: "zh"
+
+# LLM 配置
+llm:
+  type: "openai"  # 可选: openai, deepseek
+  params:
+    # OpenAI 配置
+    base_url: "${oc.env:OPENAI_BASE_URL}"
+    api_key: "${oc.env:OPENAI_API_KEY}"
+    model: "gpt-4o-mini"
+    temperature: 0.5
+    max_tokens: 1000
+    top_p: 1
+    frequency_penalty: 0
+    presence_penalty: 0
+  
+  # DeepSeek 配置 (当 type: deepseek 时使用)
+  # params:
+  #   api_key: "${oc.env:DEEPSEEK_API_KEY}"
+  #   model: "deepseek-chat"
+
+# TTS (Text-to-Speech) 配置
+tts:
+  type: "kokoro"  # 可选: kokoro, deepgram
+  params:
+    # Kokoro 配置
+    model_name: "G:/models/Kokoro-82M-v1.1-zh"
+    voice: "zf_001"
+    use_speed_adjustment: false
+  
+  # Deepgram 配置 (当 type: deepgram 时使用)
+  # params:
+  #   api_key: "${oc.env:DEEPGRAM_API_KEY}"
+  #   voice: "aura-asteria-zh"
+
+# 唤醒词配置
+wake_check:
+  enabled: true
+  wake_words:
+    - "你好"
+    - "你好, 小白"
+  idle_words:
+    - "再見"
+    - "拜拜"
+    - "拜拜了"
+    - "拜拜了您"
+  audio:
+    wake_sound: "src/sync/data/wake.wav"
+    idle_sound: "src/sync/data/idle.wav"
+    volume: 0.8
+
+# 系统提示词配置
+system_prompt: >
+  You are a helpful LLM in a WebRTC call. 
+  Your goal is to demonstrate your capabilities in a succinct way. 
+  Your output will be converted to audio so don't include special characters in your answers. 
+  Respond to what the user said in a creative and helpful way.
+
+# 欢迎消息配置
+welcome_message: "Please introduce yourself to the user."
+
+# Pipeline 配置
+pipeline:
+  enable_metrics: true
+  enable_usage_metrics: true
+  idle_timeout_secs: 300
+
+# 日志配置
+logging:
+  level: "DEBUG"
+  log_dir: "logs"
+
