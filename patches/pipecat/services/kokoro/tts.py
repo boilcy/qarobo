@@ -11,7 +11,7 @@ import re
 import sys
 from typing import AsyncGenerator, Optional
 
-import samplerate
+import librosa
 import numpy as np
 import torch
 from loguru import logger
@@ -228,9 +228,10 @@ class KokoroLocalTTSService(TTSService):
 
             # 重采样（如果需要）
             if self.sample_rate != KOKORO_NATIVE_SAMPLE_RATE:
-                ratio = self.sample_rate / KOKORO_NATIVE_SAMPLE_RATE
-                audio_resampled = samplerate.resample(
-                    audio_numpy, ratio, converter_type="sinc_best"
+                audio_resampled = librosa.resample(
+                    audio_numpy,
+                    orig_sr=KOKORO_NATIVE_SAMPLE_RATE,
+                    target_sr=self.sample_rate,
                 )
             else:
                 audio_resampled = audio_numpy
