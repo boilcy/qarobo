@@ -78,3 +78,6 @@ thor = { features = ["py312", "torch-jetson-sbsa"], solve-group = "jetson-sbsa" 
 
 [tasks.format]
 cmd = "pixi exec --spec ruff ruff format ."
+
+[tasks.bot]
+cmd = "python bot.py -c config/local.yaml -v"

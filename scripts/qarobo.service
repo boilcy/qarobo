@@ -1,0 +1,23 @@
+[Unit]
+Description=Dialogue Assistant Application
+#Requires=bluetooth-autoconnect.service
+#After=bluetooth-autoconnect.service
+Requires=bluetooth.service
+After=bluetooth.service
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=liucy
+Group=liucy
+WorkingDirectory=%/qarobo/
+ExecStart=%h/.pixi/bin/pixi run --manifest-path %h/qarobo/pixi.toml -e orin-nano bot
+Restart=on-failure
+RestartSec=5s
+StandardOutput=journal
+StandardError=inherit
+PrivateDevices=no
+
+[Install]
+WantedBy=multi-user.target

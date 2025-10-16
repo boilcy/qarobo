@@ -1,0 +1,20 @@
+[Unit]
+Description=Auto-connect to a specific Bluetooth speaker at boot
+Requires=bluetooth.service
+After=bluetooth.service
+After=sound.target
+
+[Service]
+ExecStart=%h/.local/bin/bluetooth-autoconnect.sh
+Type=simple
+Restart=on-failure
+RestartSec=5s
+# Environment variable for better logging, optional
+Environment="HOME=%h"
+# Standard output/error is directed to the systemd journal for this user service
+StandardInput=null
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=default.target
