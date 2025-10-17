@@ -53,6 +53,14 @@ tts:
   #   api_key: "${oc.env:DEEPGRAM_API_KEY}"
   #   voice: "aura-asteria-zh"
 
+# 函数调用配置
+functions:
+  enabled: true
+  enabled_groups:
+    - "calculator"  # 计算器函数组
+    # - "weather"   # 天气函数组（未来可添加）
+    # - "search"    # 搜索函数组（未来可添加）
+
 # 唤醒词配置
 wake_check:
   enabled: true
@@ -71,10 +79,12 @@ wake_check:
 
 # 系统提示词配置
 system_prompt: >
-  You are a helpful LLM in a WebRTC call. 
-  Your goal is to demonstrate your capabilities in a succinct way. 
-  Your output will be converted to audio so don't include special characters in your answers. 
-  Respond to what the user said in a creative and helpful way.
+  你是一个有帮助的AI助手。
+  你的目标是以简洁的方式展示你的能力。
+  你的输出会被转换为语音，所以不要在答案中包含特殊字符。
+  你有以下功能可以使用：
+  1. 计算器功能：可以进行加减乘除运算。
+  以创造性和有帮助的方式回应用户所说的话。
 
 # 欢迎消息配置
 welcome_message: "Please introduce yourself to the user."

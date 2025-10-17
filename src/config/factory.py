@@ -4,10 +4,11 @@
 """
 
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional, Tuple, Callable
 
 from loguru import logger
 
+from pipecat.adapters.schemas.tools_schema import ToolsSchema
 from pipecat.audio.vad.silero import SileroVADAnalyzer
 from pipecat.audio.vad.vad_analyzer import VADParams
 from pipecat.services.whisper.stt import WhisperSTTService
@@ -201,3 +202,93 @@ class ComponentFactory:
             wake_notifier=wake_notifier,
             idle_notifier=idle_notifier,
         )
+
+    @staticmethod
+    def create_tools(
+        config: Dict[str, Any]
+    ) -> Tuple[Optional[ToolsSchema], List[Tuple[str, Callable]]]:
+        """
+        根据配置创建工具模式和函数列表
+
+        Args:
+            config: 函数配置字典
+
+        Returns:
+            (ToolsSchema, 函数列表) - 工具模式对象和需要注册的函数列表
+            函数列表格式: [(function_name, function_callable), ...]
+            如果未启用任何函数，返回 (None, [])
+        """
+        if not config or not config.get("enabled", False):
+            logger.info("函数调用功能未启用")
+            return None, []
+
+        enabled_groups = config.get("enabled_groups", [])
+        if not enabled_groups:
+            logger.warning("未配置启用的函数组")
+            return None, []
+
+        all_schemas = []
+        all_functions = []
+
+        # 根据启用的函数组加载对应的函数
+        for group in enabled_groups:
+            if group == "calculator":
+                from src.functions.calculator import (
+                    get_calculator_tools,
+                    calculate_add,
+                    calculate_subtract,
+                    calculate_multiply,
+                    calculate_divide,
+                )
+
+                # 获取函数模式
+                calculator_tools = get_calculator_tools()
+                all_schemas.extend(calculator_tools.standard_tools)
+
+                # 添加函数实现
+                all_functions.extend(
+                    [
+                        ("calculate_add", calculate_add),
+                        ("calculate_subtract", calculate_subtract),
+                        ("calculate_multiply", calculate_multiply),
+                        ("calculate_divide", calculate_divide),
+                    ]
+                )
+                logger.info("loaded calculator functions")
+
+            elif group == "weather":
+                from src.functions.weather import (
+                    get_weather_tools,
+                    get_current_weather,
+                    get_weather_forecast,
+                )
+
+                # 获取函数模式
+                weather_tools = get_weather_tools()
+                all_schemas.extend(weather_tools.standard_tools)
+
+                # 添加函数实现
+                all_functions.extend(
+                    [
+                        ("get_current_weather", get_current_weather),
+                        ("get_weather_forecast", get_weather_forecast),
+                    ]
+                )
+                logger.info("loaded weather functions")
+
+            # 未来可以添加更多函数组
+            # elif group == "search":
+            #     from src.functions.search import ...
+            #     ...
+            else:
+                logger.warning(f"unknown function group: {group}")
+
+        if not all_schemas:
+            logger.warning("no functions loaded")
+            return None, []
+
+        # 创建 ToolsSchema
+        tools_schema = ToolsSchema(standard_tools=all_schemas)
+        logger.info(f"created tools schema, {len(all_schemas)} functions")
+
+        return tools_schema, all_functions

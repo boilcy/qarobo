@@ -37,6 +37,14 @@ tts:
     voice: "zf_001"
     use_speed_adjustment: false
 
+# 函数调用配置
+functions:
+  enabled: true
+  enabled_groups:
+    - "calculator"  # 计算器函数组
+    # - "weather"   # 天气函数组（未来可添加）
+    # - "search"    # 搜索函数组（未来可添加）
+
 # 唤醒词配置
 wake_check:
   enabled: true

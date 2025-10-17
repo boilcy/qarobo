@@ -15,6 +15,7 @@ from dotenv import load_dotenv
 # !!!IMPORTANT: This import is aim to override the loguru logger that set by kokoro
 from kokoro import KModel, KPipeline  # noqa: F401
 
+from pipecat.frames.frames import TTSSpeakFrame
 from pipecat.pipeline.pipeline import Pipeline
 from pipecat.pipeline.runner import PipelineRunner
 from pipecat.pipeline.task import PipelineParams, PipelineTask
@@ -134,6 +135,24 @@ async def main():
     tl = TranscriptionLogger()
     ml = MetricsLogger()
 
+    # 创建函数工具和注册函数
+    functions_config = config.get("functions", {})
+    tools_schema, functions_list = ComponentFactory.create_tools(functions_config)
+
+    # 注册函数到 LLM
+    if functions_list:
+        for function_name, function_callable in functions_list:
+            llm.register_function(function_name, function_callable)
+            logger.info(f"registered function: {function_name}")
+
+        # 添加函数调用开始事件处理器
+        @llm.event_handler("on_function_calls_started")
+        async def on_function_calls_started(service, function_calls):
+            logger.info(
+                f"function calls started: {[fc.function_name for fc in function_calls]}"
+            )
+            await tts.queue_frame(TTSSpeakFrame("让我想一想"))
+
     # 从配置获取系统提示词
     system_prompt = config.get_system_prompt()
     messages = [
@@ -148,7 +167,12 @@ async def main():
         config.get_wake_check_config(), CURRENT_DIR
     )
 
-    context = LLMContext(messages)
+    # 创建 LLM Context，如果有工具则传入
+    context = (
+        LLMContext(messages, tools_schema)
+        if tools_schema.standard_tools != []
+        else LLMContext(messages)
+    )
     context_aggregator = LLMContextAggregatorPair(context)
 
     # 构建 Pipeline
