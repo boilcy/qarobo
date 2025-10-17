@@ -14,7 +14,7 @@ from pipecat.services.llm_service import FunctionCallParams
 # 计算器函数实现
 async def calculate_add(params: FunctionCallParams):
     """执行加法运算"""
-    logger.info(f"计算加法: {params.arguments}")
+    logger.info(f"Calculating addition: {params.arguments}")
 
     try:
         a = float(params.arguments.get("a", 0))
@@ -31,13 +31,13 @@ async def calculate_add(params: FunctionCallParams):
             }
         )
     except Exception as e:
-        logger.error(f"加法运算错误: {e}")
+        logger.error(f"Addition calculation error: {e}")
         await params.result_callback({"error": str(e)})
 
 
 async def calculate_subtract(params: FunctionCallParams):
     """执行减法运算"""
-    logger.info(f"计算减法: {params.arguments}")
+    logger.info(f"Calculating subtraction: {params.arguments}")
 
     try:
         a = float(params.arguments.get("a", 0))
@@ -54,13 +54,13 @@ async def calculate_subtract(params: FunctionCallParams):
             }
         )
     except Exception as e:
-        logger.error(f"减法运算错误: {e}")
+        logger.error(f"Subtraction calculation error: {e}")
         await params.result_callback({"error": str(e)})
 
 
 async def calculate_multiply(params: FunctionCallParams):
     """执行乘法运算"""
-    logger.info(f"计算乘法: {params.arguments}")
+    logger.info(f"Calculating multiplication: {params.arguments}")
 
     try:
         a = float(params.arguments.get("a", 0))
@@ -77,20 +77,20 @@ async def calculate_multiply(params: FunctionCallParams):
             }
         )
     except Exception as e:
-        logger.error(f"乘法运算错误: {e}")
+        logger.error(f"Multiplication calculation error: {e}")
         await params.result_callback({"error": str(e)})
 
 
 async def calculate_divide(params: FunctionCallParams):
     """执行除法运算"""
-    logger.info(f"计算除法: {params.arguments}")
+    logger.info(f"Calculating division: {params.arguments}")
 
     try:
         a = float(params.arguments.get("a", 0))
         b = float(params.arguments.get("b", 0))
 
         if b == 0:
-            await params.result_callback({"error": "除数不能为零"})
+            await params.result_callback({"error": "Divisor cannot be zero"})
             return
 
         result = a / b
@@ -105,7 +105,7 @@ async def calculate_divide(params: FunctionCallParams):
             }
         )
     except Exception as e:
-        logger.error(f"除法运算错误: {e}")
+        logger.error(f"Division calculation error: {e}")
         await params.result_callback({"error": str(e)})
 
 
@@ -198,4 +198,4 @@ def register_calculator_functions(llm):
     llm.register_function("calculate_subtract", calculate_subtract)
     llm.register_function("calculate_multiply", calculate_multiply)
     llm.register_function("calculate_divide", calculate_divide)
-    logger.info("已注册所有计算器函数")
+    logger.info("All calculator functions registered")

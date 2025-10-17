@@ -68,9 +68,9 @@ def setup_logger(
             compression="zip",  # 压缩旧日志
         )
 
-        logger.info(f"日志文件: {log_file}")
+        logger.info(f"Log file: {log_file}")
 
-    logger.info(f"日志级别: {log_level}")
+    logger.info(f"Log level: {log_level}")
 
 
 def get_logger():

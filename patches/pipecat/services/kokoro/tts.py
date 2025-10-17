@@ -158,7 +158,7 @@ class KokoroLocalTTSService(TTSService):
             )
             result = next(generator)
             _ = result.audio
-            logger.info(f"{self.__class__.__name__}: warmed up successfully")
+            logger.info(f"{self.__class__.__name__} warmed up successfully")
         except Exception as e:
             logger.warning(f"Warmup failed: {e}")
 

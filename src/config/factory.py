@@ -54,7 +54,7 @@ class ComponentFactory:
         params = config.get("params", {})
 
         if transport_type != "local_audio":
-            raise ValueError(f"不支持的 Transport 类型: {transport_type}")
+            raise ValueError(f"Unsupported Transport type: {transport_type}")
 
         # 创建 VAD analyzer
         vad_config = params.get("vad", {})
@@ -72,7 +72,7 @@ class ComponentFactory:
             output_device_index=params.get("output_device_index", None),
         )
 
-        logger.info(f"创建 Transport: {transport_type}")
+        logger.info(f"Creating Transport: {transport_type}")
         return LocalAudioTransport(transport_params)
 
     @staticmethod
@@ -90,13 +90,13 @@ class ComponentFactory:
         params = config.get("params", {})
 
         if stt_type == "whisper":
-            logger.info(f"创建 Whisper STT: {params.get('model')}")
+            logger.info(f"Creating Whisper STT: {params.get('model')}")
             return WhisperSTTService(
                 model=params.get("model", "base"),
                 language=params.get("language", "zh"),
             )
         else:
-            raise ValueError(f"不支持的 STT 类型: {stt_type}")
+            raise ValueError(f"Unsupported STT type: {stt_type}")
 
     @staticmethod
     def create_llm(config: Dict[str, Any]):
@@ -113,20 +113,22 @@ class ComponentFactory:
         params = config.get("params", {})
 
         if llm_type == "openai":
-            logger.info(f"创建 OpenAI LLM: {params.get('model')}")
+            logger.info(f"Creating OpenAI LLM: {params.get('model')}")
             return OpenAILLMService(
                 base_url=params.get("base_url"),
                 api_key=params.get("api_key"),
                 model=params.get("model", "gpt-4o-mini"),
             )
         elif llm_type == "deepseek":
-            logger.info(f"创建 DeepSeek LLM: {params.get('model', 'deepseek-chat')}")
+            logger.info(
+                f"Creating DeepSeek LLM: {params.get('model', 'deepseek-chat')}"
+            )
             return DeepSeekLLMService(
                 api_key=params.get("api_key"),
                 model=params.get("model", "deepseek-chat"),
             )
         else:
-            raise ValueError(f"不支持的 LLM 类型: {llm_type}")
+            raise ValueError(f"Unsupported LLM type: {llm_type}")
 
     @staticmethod
     def create_tts(config: Dict[str, Any]):
@@ -143,7 +145,7 @@ class ComponentFactory:
         params = config.get("params", {})
 
         if tts_type == "kokoro":
-            logger.info(f"创建 Kokoro TTS: {params.get('model_name')}")
+            logger.info(f"Creating Kokoro TTS: {params.get('model_name')}")
             return KokoroLocalTTSService(
                 model_name=params.get("model_name"),
                 voice=params.get("voice", "zf_001"),
@@ -153,13 +155,13 @@ class ComponentFactory:
             # 需要添加 import
             from pipecat.services.deepgram.tts import DeepgramTTSService
 
-            logger.info(f"创建 Deepgram TTS: {params.get('voice')}")
+            logger.info(f"Creating Deepgram TTS: {params.get('voice')}")
             return DeepgramTTSService(
                 api_key=params.get("api_key"),
                 voice=params.get("voice", "aura-asteria-zh"),
             )
         else:
-            raise ValueError(f"不支持的 TTS 类型: {tts_type}")
+            raise ValueError(f"Unsupported TTS type: {tts_type}")
 
     @staticmethod
     def create_wake_check_filter(
@@ -176,7 +178,7 @@ class ComponentFactory:
             WakeCheckFilter 实例或 None
         """
         if not config.get("enabled", True):
-            logger.info("唤醒词过滤器已禁用")
+            logger.info("Wake word filter disabled")
             return None
 
         wake_words = config.get("wake_words", [])
@@ -198,20 +200,20 @@ class ComponentFactory:
 
         if wake_audio_path.exists():
             wake_notifier = AudioNotifier(str(wake_audio_path), volume=volume)
-            logger.info(f"创建唤醒音频通知器: {wake_audio_path}")
+            logger.info(f"Creating wake audio notifier: {wake_audio_path}")
         else:
-            logger.warning(f"唤醒音频文件未找到: {wake_audio_path}")
+            logger.warning(f"Wake audio file not found: {wake_audio_path}")
 
         if idle_audio_path.exists():
             idle_notifier = AudioNotifier(str(idle_audio_path), volume=volume)
-            logger.info(f"创建空闲音频通知器: {idle_audio_path}")
+            logger.info(f"Creating idle audio notifier: {idle_audio_path}")
         else:
-            logger.warning(f"空闲音频文件未找到: {idle_audio_path}")
+            logger.warning(f"Idle audio file not found: {idle_audio_path}")
 
         # 构建日志消息
-        log_msg = f"创建唤醒词过滤器: wake={wake_words}, idle={idle_words}"
+        log_msg = f"Creating wake word filter: wake={wake_words}, idle={idle_words}"
         if wake_timeout:
-            log_msg += f", timeout={wake_timeout}秒"
+            log_msg += f", timeout={wake_timeout}s"
         logger.info(log_msg)
 
         return WakeCheckFilter(
@@ -244,7 +246,7 @@ class ComponentFactory:
                 min_words: 4
         """
         if not config:
-            logger.info("未配置中断策略")
+            logger.info("No interruption strategies configured")
             return []
 
         strategies = []
@@ -256,30 +258,38 @@ class ComponentFactory:
             if strategy_type == "keyword":
                 keywords = params.get("keywords", [])
                 if not keywords:
-                    logger.warning("关键词中断策略未配置关键词，跳过")
+                    logger.warning(
+                        "Keyword interruption strategy has no keywords, skipping"
+                    )
                     continue
                 strategy = KeywordInterruptionStrategy(keywords=keywords)
-                logger.info(f"创建关键词中断策略: keywords={keywords}")
+                logger.info(
+                    f"Creating keyword interruption strategy: keywords={keywords}"
+                )
                 strategies.append(strategy)
 
             elif strategy_type == "min_words":
                 min_words = params.get("min_words", 3)
                 strategy = MinWordsInterruptionStrategy(min_words=min_words)
-                logger.info(f"创建最小词数中断策略: min_words={min_words}")
+                logger.info(
+                    f"Creating min words interruption strategy: min_words={min_words}"
+                )
                 strategies.append(strategy)
 
             elif strategy_type == "never":
                 strategy = NeverInterruptionStrategy()
-                logger.info("创建永不中断策略")
+                logger.info("Creating never interruption strategy")
                 strategies.append(strategy)
 
             else:
-                logger.warning(f"不支持的中断策略类型: {strategy_type}")
+                logger.warning(
+                    f"Unsupported interruption strategy type: {strategy_type}"
+                )
 
         if not strategies:
-            logger.warning("没有创建任何中断策略")
+            logger.warning("No interruption strategies created")
         else:
-            logger.info(f"共创建 {len(strategies)} 个中断策略")
+            logger.info(f"Created {len(strategies)} interruption strategies")
 
         return strategies
 
@@ -299,12 +309,12 @@ class ComponentFactory:
             如果未启用任何函数，返回 (None, [])
         """
         if not config or not config.get("enabled", False):
-            logger.info("函数调用功能未启用")
+            logger.info("Function calling feature not enabled")
             return None, []
 
         enabled_groups = config.get("enabled_groups", [])
         if not enabled_groups:
-            logger.warning("未配置启用的函数组")
+            logger.warning("No enabled function groups configured")
             return None, []
 
         all_schemas = []
@@ -361,14 +371,14 @@ class ComponentFactory:
             #     from src.functions.search import ...
             #     ...
             else:
-                logger.warning(f"unknown function group: {group}")
+                logger.warning(f"Unknown function group: {group}")
 
         if not all_schemas:
-            logger.warning("no functions loaded")
+            logger.warning("No functions loaded")
             return None, []
 
         # 创建 ToolsSchema
         tools_schema = ToolsSchema(standard_tools=all_schemas)
-        logger.info(f"created tools schema, {len(all_schemas)} functions")
+        logger.info(f"Created tools schema with {len(all_schemas)} functions")
 
         return tools_schema, all_functions

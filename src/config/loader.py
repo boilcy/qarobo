@@ -27,7 +27,7 @@ class ConfigLoader:
     def _load_config(self):
         """加载配置文件"""
         if not self.config_path.exists():
-            raise FileNotFoundError(f"配置文件未找到: {self.config_path}")
+            raise FileNotFoundError(f"Config file not found: {self.config_path}")
 
         # 使用 OmegaConf 加载配置
         self.config = OmegaConf.load(self.config_path)
@@ -36,7 +36,7 @@ class ConfigLoader:
         # 使用 ${env:VAR_NAME} 或 ${oc.env:VAR_NAME} 格式
         OmegaConf.resolve(self.config)
 
-        logger.info(f"配置文件已加载: {self.config_path}")
+        logger.info(f"Config file loaded: {self.config_path}")
 
     def get(self, key: str, default: Any = None) -> Any:
         """
@@ -52,7 +52,7 @@ class ConfigLoader:
         try:
             return OmegaConf.select(self.config, key, default=default)
         except Exception as e:
-            logger.warning(f"获取配置 {key} 失败: {e}")
+            logger.warning(f"Failed to get config {key}: {e}")
             return default
 
     def get_transport_config(self) -> DictConfig:
@@ -100,7 +100,7 @@ class ConfigLoader:
     def reload(self):
         """重新加载配置文件"""
         self._load_config()
-        logger.info("配置已重新加载")
+        logger.info("Config reloaded")
 
     def to_dict(self) -> dict:
         """
@@ -123,7 +123,7 @@ class ConfigLoader:
         else:
             self.config = OmegaConf.merge(self.config, config_dict)
 
-        logger.info("配置已从字典合并")
+        logger.info("Config merged from dict")
 
     def __repr__(self) -> str:
         """返回配置的字符串表示"""

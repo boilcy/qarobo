@@ -14,7 +14,7 @@ from pipecat.services.llm_service import FunctionCallParams
 # 天气函数实现（演示版本，返回模拟数据）
 async def get_current_weather(params: FunctionCallParams):
     """获取指定位置的当前天气"""
-    logger.info(f"查询天气: {params.arguments}")
+    logger.info(f"Querying weather: {params.arguments}")
 
     try:
         location = params.arguments.get("location", "未知位置")
@@ -57,17 +57,17 @@ async def get_current_weather(params: FunctionCallParams):
             "description": f"{location}当前天气{city_data['condition']}，温度{temperature}{unit}",
         }
 
-        logger.info(f"天气查询结果: {result}")
+        logger.info(f"Weather query result: {result}")
         await params.result_callback(result)
 
     except Exception as e:
-        logger.error(f"天气查询错误: {e}")
+        logger.error(f"Weather query error: {e}")
         await params.result_callback({"error": str(e)})
 
 
 async def get_weather_forecast(params: FunctionCallParams):
     """获取指定位置的天气预报（未来几天）"""
-    logger.info(f"查询天气预报: {params.arguments}")
+    logger.info(f"Querying weather forecast: {params.arguments}")
 
     try:
         location = params.arguments.get("location", "未知位置")
@@ -93,11 +93,11 @@ async def get_weather_forecast(params: FunctionCallParams):
             "description": f"{location}未来{days}天天气预报",
         }
 
-        logger.info(f"天气预报查询结果: {result}")
+        logger.info(f"Weather forecast query result: {result}")
         await params.result_callback(result)
 
     except Exception as e:
-        logger.error(f"天气预报查询错误: {e}")
+        logger.error(f"Weather forecast query error: {e}")
         await params.result_callback({"error": str(e)})
 
 
@@ -155,4 +155,4 @@ def register_weather_functions(llm):
     """
     llm.register_function("get_current_weather", get_current_weather)
     llm.register_function("get_weather_forecast", get_weather_forecast)
-    logger.info("已注册所有天气函数")
+    logger.info("All weather functions registered")

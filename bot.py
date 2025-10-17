@@ -120,9 +120,9 @@ async def main():
 
     logger = get_logger()
     logger.info("=" * 60)
-    logger.info("QARobo Pipecat 启动中...")
-    logger.info(f"配置文件: {args.config_path}")
-    logger.info(f"日志级别: {log_level}")
+    logger.info("QARobo Pipecat starting...")
+    logger.info(f"Config file: {args.config_path}")
+    logger.info(f"Log level: {log_level}")
     logger.info("=" * 60)
 
     # 使用工厂创建组件

@@ -124,7 +124,7 @@ class WakeCheckFilter(FrameProcessor):
         # 如果设置了超时，启动超时检查任务
         if self._wake_timeout:
             self._timeout_check_task = asyncio.create_task(self._check_timeout_loop())
-            logger.info(f"启用唤醒超时检查，超时时间: {self._wake_timeout}秒")
+            logger.info(f"Wake timeout check enabled, timeout: {self._wake_timeout}s")
 
     async def process_frame(self, frame: Frame, direction: FrameDirection):
         """Process incoming frames, filtering transcriptions based on wake detection.
@@ -231,21 +231,21 @@ class WakeCheckFilter(FrameProcessor):
                         # 如果超过超时时间，自动切换到 IDLE 状态
                         if time_since_last_activity >= self._wake_timeout:
                             logger.info(
-                                f"参与者 {participant_id} 在 AWAKE 状态下超时 "
-                                f"({time_since_last_activity:.1f}秒)，自动切换到 IDLE 状态"
+                                f"Participant {participant_id} timed out in AWAKE state "
+                                f"({time_since_last_activity:.1f}s), switching to IDLE"
                             )
                             p.state = WakeCheckFilter.WakeState.IDLE
                             p.accumulator = ""
 
                             # 如果设置了 idle_notifier，触发通知
                             if self._idle_notifier:
-                                logger.debug("触发超时 idle notifier")
+                                logger.debug("Triggering timeout idle notifier")
                                 await self._idle_notifier.notify()
 
         except asyncio.CancelledError:
-            logger.debug("超时检查任务已取消")
+            logger.debug("Timeout check task cancelled")
         except Exception as e:
-            logger.exception(f"超时检查循环出错: {e}")
+            logger.exception(f"Error in timeout check loop: {e}")
 
     async def cleanup(self):
         """清理资源，取消超时检查任务。"""
@@ -255,5 +255,5 @@ class WakeCheckFilter(FrameProcessor):
                 await self._timeout_check_task
             except asyncio.CancelledError:
                 pass
-            logger.debug("超时检查任务已清理")
+            logger.debug("Timeout check task cleaned up")
         await super().cleanup()
