@@ -23,6 +23,9 @@ from pipecat.processors.aggregators.llm_context import LLMContext
 from pipecat.processors.aggregators.llm_response_universal import (
     LLMContextAggregatorPair,
 )
+from pipecat.audio.interruptions.min_words_interruption_strategy import (
+    MinWordsInterruptionStrategy,
+)
 
 from src.config.loader import ConfigLoader
 from src.config.factory import ComponentFactory
@@ -204,8 +207,10 @@ async def main():
         params=PipelineParams(
             enable_metrics=pipeline_config.get("enable_metrics", True),
             enable_usage_metrics=pipeline_config.get("enable_usage_metrics", True),
+            interruption_strategies=[MinWordsInterruptionStrategy(min_words=6)],
         ),
         idle_timeout_secs=pipeline_config.get("idle_timeout_secs", 300),
+        cancel_on_idle_timeout=False,
     )
 
     @transport.event_handler("on_client_connected")

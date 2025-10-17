@@ -12,7 +12,9 @@ Frames containing wake phrases and idle phrases can either be passed through
 or replaced with notifier signals depending on configuration.
 """
 
+import asyncio
 import re
+import time
 from enum import Enum
 from typing import List, Optional
 
@@ -62,6 +64,7 @@ class WakeCheckFilter(FrameProcessor):
             participant_id: Unique identifier for the participant.
             state: Current wake state (IDLE or AWAKE).
             accumulator: Accumulated text for wake/idle phrase matching.
+            last_activity_time: Timestamp of last received transcription.
         """
 
         def __init__(self, participant_id: str):
@@ -73,6 +76,7 @@ class WakeCheckFilter(FrameProcessor):
             self.participant_id = participant_id
             self.state = WakeCheckFilter.WakeState.IDLE
             self.accumulator = ""
+            self.last_activity_time = time.time()
 
     def __init__(
         self,
@@ -80,6 +84,7 @@ class WakeCheckFilter(FrameProcessor):
         idle_phrases: List[str],
         wake_notifier: Optional["BaseNotifier"] = None,
         idle_notifier: Optional["BaseNotifier"] = None,
+        wake_timeout: Optional[float] = None,
     ):
         """Initialize the wake phrase filter.
 
@@ -90,6 +95,8 @@ class WakeCheckFilter(FrameProcessor):
                 If provided, frames containing wake phrases will NOT be passed through.
             idle_notifier: Optional notifier to trigger when idle phrase is detected.
                 If provided, frames containing idle phrases will NOT be passed through.
+            wake_timeout: Optional timeout in seconds. If set, the filter will automatically
+                switch from AWAKE to IDLE state after this duration of no user input.
         """
         super().__init__()
         self._participant_states = {}
@@ -97,6 +104,8 @@ class WakeCheckFilter(FrameProcessor):
         self._idle_patterns = []
         self._wake_notifier = wake_notifier
         self._idle_notifier = idle_notifier
+        self._wake_timeout = wake_timeout
+        self._timeout_check_task = None
 
         for name in wake_phrases:
             pattern = re.compile(
@@ -111,6 +120,11 @@ class WakeCheckFilter(FrameProcessor):
                 re.IGNORECASE,
             )
             self._idle_patterns.append(pattern)
+
+        # 如果设置了超时，启动超时检查任务
+        if self._wake_timeout:
+            self._timeout_check_task = asyncio.create_task(self._check_timeout_loop())
+            logger.info(f"启用唤醒超时检查，超时时间: {self._wake_timeout}秒")
 
     async def process_frame(self, frame: Frame, direction: FrameDirection):
         """Process incoming frames, filtering transcriptions based on wake detection.
@@ -128,6 +142,8 @@ class WakeCheckFilter(FrameProcessor):
                     p = WakeCheckFilter.ParticipantState(frame.user_id)
                     self._participant_states[frame.user_id] = p
 
+                # 更新活动时间
+                p.last_activity_time = time.time()
                 p.accumulator += frame.text
 
                 # 如果当前处于 AWAKE 状态
@@ -199,3 +215,45 @@ class WakeCheckFilter(FrameProcessor):
             error_msg = f"Error in wake word filter: {e}"
             logger.exception(error_msg)
             await self.push_error(ErrorFrame(error_msg))
+
+    async def _check_timeout_loop(self):
+        """定期检查是否有参与者在 AWAKE 状态下超时未活动。"""
+        try:
+            while True:
+                await asyncio.sleep(1)  # 每秒检查一次
+                current_time = time.time()
+
+                for participant_id, p in list(self._participant_states.items()):
+                    # 只检查处于 AWAKE 状态的参与者
+                    if p.state == WakeCheckFilter.WakeState.AWAKE:
+                        time_since_last_activity = current_time - p.last_activity_time
+
+                        # 如果超过超时时间，自动切换到 IDLE 状态
+                        if time_since_last_activity >= self._wake_timeout:
+                            logger.info(
+                                f"参与者 {participant_id} 在 AWAKE 状态下超时 "
+                                f"({time_since_last_activity:.1f}秒)，自动切换到 IDLE 状态"
+                            )
+                            p.state = WakeCheckFilter.WakeState.IDLE
+                            p.accumulator = ""
+
+                            # 如果设置了 idle_notifier，触发通知
+                            if self._idle_notifier:
+                                logger.debug("触发超时 idle notifier")
+                                await self._idle_notifier.notify()
+
+        except asyncio.CancelledError:
+            logger.debug("超时检查任务已取消")
+        except Exception as e:
+            logger.exception(f"超时检查循环出错: {e}")
+
+    async def cleanup(self):
+        """清理资源，取消超时检查任务。"""
+        if self._timeout_check_task:
+            self._timeout_check_task.cancel()
+            try:
+                await self._timeout_check_task
+            except asyncio.CancelledError:
+                pass
+            logger.debug("超时检查任务已清理")
+        await super().cleanup()

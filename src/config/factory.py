@@ -170,6 +170,7 @@ class ComponentFactory:
         wake_words = config.get("wake_words", [])
         idle_words = config.get("idle_words", [])
         audio_config = config.get("audio", {})
+        wake_timeout = config.get("wake_timeout", None)
 
         # 创建音频通知器
         wake_notifier = None
@@ -195,12 +196,18 @@ class ComponentFactory:
         else:
             logger.warning(f"空闲音频文件未找到: {idle_audio_path}")
 
-        logger.info(f"创建唤醒词过滤器: wake={wake_words}, idle={idle_words}")
+        # 构建日志消息
+        log_msg = f"创建唤醒词过滤器: wake={wake_words}, idle={idle_words}"
+        if wake_timeout:
+            log_msg += f", timeout={wake_timeout}秒"
+        logger.info(log_msg)
+
         return WakeCheckFilter(
             wake_phrases=wake_words,
             idle_phrases=idle_words,
             wake_notifier=wake_notifier,
             idle_notifier=idle_notifier,
+            wake_timeout=wake_timeout,
         )
 
     @staticmethod

@@ -53,6 +53,7 @@ wake_check:
     - "拜拜"
     - "拜拜了"
     - "拜拜了您"
+  wake_timeout: 30
   audio:
     wake_sound: "src/sync/data/wake.wav"
     idle_sound: "src/sync/data/idle.wav"
