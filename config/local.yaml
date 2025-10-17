@@ -52,15 +52,28 @@ wake_check:
     - "你好"
     - "你好, 小白"
   idle_words:
+    - "再见"
     - "再見"
     - "拜拜"
     - "拜拜了"
-    - "拜拜了您"
   wake_timeout: 30
   audio:
     wake_sound: "src/sync/data/wake.wav"
     idle_sound: "src/sync/data/idle.wav"
     volume: 0.8
+
+# 中断策略配置
+interruption_strategies:
+  - type: "keyword"
+    params:
+      keywords: ["小白小白", "停下"]
+  
+  - type: "min_words"
+    params:
+      min_words: 4
+  
+  # 永不中断策略 - 禁用所有中断（如需禁用中断，使用此策略）
+  # - type: "never"
 
 # 系统提示词配置
 system_prompt: >

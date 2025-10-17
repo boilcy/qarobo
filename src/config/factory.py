@@ -18,9 +18,21 @@ from pipecat.transports.local.audio import (
     LocalAudioTransport,
     LocalAudioTransportParams,
 )
+from pipecat.audio.interruptions.base_interruption_strategy import (
+    BaseInterruptionStrategy,
+)
+from pipecat.audio.interruptions.min_words_interruption_strategy import (
+    MinWordsInterruptionStrategy,
+)
 
 from patches.pipecat.services.kokoro import KokoroLocalTTSService
 from patches.pipecat.processors.filters.wake_check_filter import WakeCheckFilter
+from patches.pipecat.audio.interruptions.keyword_interruption_strategy import (
+    KeywordInterruptionStrategy,
+)
+from patches.pipecat.audio.interruptions.never_interruption_strategy import (
+    NeverInterruptionStrategy,
+)
 from src.sync.audio_notifier import AudioNotifier
 
 
@@ -209,6 +221,67 @@ class ComponentFactory:
             idle_notifier=idle_notifier,
             wake_timeout=wake_timeout,
         )
+
+    @staticmethod
+    def create_interruption_strategies(
+        config: List[Dict[str, Any]],
+    ) -> List[BaseInterruptionStrategy]:
+        """
+        创建中断策略列表
+
+        Args:
+            config: 中断策略配置列表，每个策略包含 type 和 params
+
+        Returns:
+            BaseInterruptionStrategy 列表
+
+        Example config:
+            - type: "keyword"
+              params:
+                keywords: ["小白小白"]
+            - type: "min_words"
+              params:
+                min_words: 4
+        """
+        if not config:
+            logger.info("未配置中断策略")
+            return []
+
+        strategies = []
+
+        for strategy_config in config:
+            strategy_type = strategy_config.get("type")
+            params = strategy_config.get("params", {})
+
+            if strategy_type == "keyword":
+                keywords = params.get("keywords", [])
+                if not keywords:
+                    logger.warning("关键词中断策略未配置关键词，跳过")
+                    continue
+                strategy = KeywordInterruptionStrategy(keywords=keywords)
+                logger.info(f"创建关键词中断策略: keywords={keywords}")
+                strategies.append(strategy)
+
+            elif strategy_type == "min_words":
+                min_words = params.get("min_words", 3)
+                strategy = MinWordsInterruptionStrategy(min_words=min_words)
+                logger.info(f"创建最小词数中断策略: min_words={min_words}")
+                strategies.append(strategy)
+
+            elif strategy_type == "never":
+                strategy = NeverInterruptionStrategy()
+                logger.info("创建永不中断策略")
+                strategies.append(strategy)
+
+            else:
+                logger.warning(f"不支持的中断策略类型: {strategy_type}")
+
+        if not strategies:
+            logger.warning("没有创建任何中断策略")
+        else:
+            logger.info(f"共创建 {len(strategies)} 个中断策略")
+
+        return strategies
 
     @staticmethod
     def create_tools(

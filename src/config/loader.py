@@ -75,6 +75,12 @@ class ConfigLoader:
         """获取唤醒词配置"""
         return self.config.wake_check if self.config else OmegaConf.create({})
 
+    def get_interruption_strategies_config(self) -> DictConfig:
+        """获取中断策略配置"""
+        return (
+            self.config.interruption_strategies if self.config else OmegaConf.create({})
+        )
+
     def get_system_prompt(self) -> str:
         """获取系统提示词"""
         return self.get("system_prompt", "")
