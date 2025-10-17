@@ -205,7 +205,7 @@ class ComponentFactory:
 
     @staticmethod
     def create_tools(
-        config: Dict[str, Any]
+        config: Dict[str, Any],
     ) -> Tuple[Optional[ToolsSchema], List[Tuple[str, Callable]]]:
         """
         根据配置创建工具模式和函数列表

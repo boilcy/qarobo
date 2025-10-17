@@ -15,100 +15,98 @@ from pipecat.services.llm_service import FunctionCallParams
 async def calculate_add(params: FunctionCallParams):
     """执行加法运算"""
     logger.info(f"计算加法: {params.arguments}")
-    
+
     try:
         a = float(params.arguments.get("a", 0))
         b = float(params.arguments.get("b", 0))
         result = a + b
-        
-        await params.result_callback({
-            "operation": "add",
-            "a": a,
-            "b": b,
-            "result": result,
-            "expression": f"{a} + {b} = {result}"
-        })
+
+        await params.result_callback(
+            {
+                "operation": "add",
+                "a": a,
+                "b": b,
+                "result": result,
+                "expression": f"{a} + {b} = {result}",
+            }
+        )
     except Exception as e:
         logger.error(f"加法运算错误: {e}")
-        await params.result_callback({
-            "error": str(e)
-        })
+        await params.result_callback({"error": str(e)})
 
 
 async def calculate_subtract(params: FunctionCallParams):
     """执行减法运算"""
     logger.info(f"计算减法: {params.arguments}")
-    
+
     try:
         a = float(params.arguments.get("a", 0))
         b = float(params.arguments.get("b", 0))
         result = a - b
-        
-        await params.result_callback({
-            "operation": "subtract",
-            "a": a,
-            "b": b,
-            "result": result,
-            "expression": f"{a} - {b} = {result}"
-        })
+
+        await params.result_callback(
+            {
+                "operation": "subtract",
+                "a": a,
+                "b": b,
+                "result": result,
+                "expression": f"{a} - {b} = {result}",
+            }
+        )
     except Exception as e:
         logger.error(f"减法运算错误: {e}")
-        await params.result_callback({
-            "error": str(e)
-        })
+        await params.result_callback({"error": str(e)})
 
 
 async def calculate_multiply(params: FunctionCallParams):
     """执行乘法运算"""
     logger.info(f"计算乘法: {params.arguments}")
-    
+
     try:
         a = float(params.arguments.get("a", 0))
         b = float(params.arguments.get("b", 0))
         result = a * b
-        
-        await params.result_callback({
-            "operation": "multiply",
-            "a": a,
-            "b": b,
-            "result": result,
-            "expression": f"{a} × {b} = {result}"
-        })
+
+        await params.result_callback(
+            {
+                "operation": "multiply",
+                "a": a,
+                "b": b,
+                "result": result,
+                "expression": f"{a} × {b} = {result}",
+            }
+        )
     except Exception as e:
         logger.error(f"乘法运算错误: {e}")
-        await params.result_callback({
-            "error": str(e)
-        })
+        await params.result_callback({"error": str(e)})
 
 
 async def calculate_divide(params: FunctionCallParams):
     """执行除法运算"""
     logger.info(f"计算除法: {params.arguments}")
-    
+
     try:
         a = float(params.arguments.get("a", 0))
         b = float(params.arguments.get("b", 0))
-        
+
         if b == 0:
-            await params.result_callback({
-                "error": "除数不能为零"
-            })
+            await params.result_callback({"error": "除数不能为零"})
             return
-        
+
         result = a / b
-        
-        await params.result_callback({
-            "operation": "divide",
-            "a": a,
-            "b": b,
-            "result": result,
-            "expression": f"{a} ÷ {b} = {result}"
-        })
+
+        await params.result_callback(
+            {
+                "operation": "divide",
+                "a": a,
+                "b": b,
+                "result": result,
+                "expression": f"{a} ÷ {b} = {result}",
+            }
+        )
     except Exception as e:
         logger.error(f"除法运算错误: {e}")
-        await params.result_callback({
-            "error": str(e)
-        })
+        await params.result_callback({"error": str(e)})
 
 
 # 函数模式定义
@@ -192,7 +190,7 @@ def get_calculator_tools() -> ToolsSchema:
 def register_calculator_functions(llm):
     """
     将所有计算器函数注册到 LLM 服务
-    
+
     Args:
         llm: LLM 服务实例
     """
@@ -201,4 +199,3 @@ def register_calculator_functions(llm):
     llm.register_function("calculate_multiply", calculate_multiply)
     llm.register_function("calculate_divide", calculate_divide)
     logger.info("已注册所有计算器函数")
-

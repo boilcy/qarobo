@@ -28,4 +28,3 @@ __all__ = [
     "get_weather_forecast",
     "get_weather_tools",
 ]
-

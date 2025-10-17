@@ -169,9 +169,7 @@ async def main():
 
     # 创建 LLM Context，如果有工具则传入
     context = (
-        LLMContext(messages, tools_schema)
-        if tools_schema.standard_tools != []
-        else LLMContext(messages)
+        LLMContext(messages, tools_schema) if tools_schema else LLMContext(messages)
     )
     context_aggregator = LLMContextAggregatorPair(context)
 
