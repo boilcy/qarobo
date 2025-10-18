@@ -33,7 +33,7 @@ def setup_logger(
     # 配置控制台日志
     if enable_console_logging:
         logger.add(
-            sys.stderr,
+            sys.stdout,
             level=log_level,
             format="<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | "
             "<level>{level: <8}</level> | "
