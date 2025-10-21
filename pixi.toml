@@ -67,9 +67,6 @@ kokoro = ">=0.9.4, <0.10"
 pytorch-gpu = ">=2.5.1,<3"
 
 # --- Feature for G1 w/ Jetson Orin NX---
-[feature.g1]
-platforms = ["linux-aarch64"]
-
 [feature.g1.dependencies]
 # override the dependencies because orin nx is old
 loguru = ">=0.7.0,<0.8"
@@ -80,6 +77,11 @@ pip = ">=22.3,<26"
 
 [feature.g1.pypi-dependencies]
 opencv-python = "*"
+# unitree_sdk2py = { path = "./third_party/unitree_sdk2_python", editable = true }
+# cyclonedds = { version = "==0.10.2" }
+
+[feature.g1.pypi-options]
+# no-binary = ["cyclonedds"]
 
 # --- Feature for Jetson Orin NX (JP5) ---
 [feature.torch-jetson-jp5]
