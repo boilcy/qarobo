@@ -1,0 +1,6 @@
+run-post-link-scripts = "insecure"
+
+[mirrors]
+"https://conda.anaconda.org/conda-forge" = ["https://mirrors.ustc.edu.cn/anaconda/cloud/conda-forge/"]
+"https://conda.anaconda.org/pytorch" = ["https://mirrors.ustc.edu.cn/anaconda/cloud/pytorch"]
+"https://conda.anaconda.org/nvidia" = ["https://mirrors.sustech.edu.cn/anaconda-extra/cloud/nvidia"]

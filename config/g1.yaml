@@ -1,0 +1,85 @@
+# QARobo Pipeline Configuration - Unitree G1
+# 机器人管道配置文件 - 使用 G1 的原生 STT/TTS
+
+# G1 音频配置
+g1_audio:
+  netiface: "eth0"  # 网络接口名称，根据实际情况修改 (如 enp60s0)
+  domain_id: 0  # DDS Domain ID
+  timeout: 10.0  # AudioClient 超时时间（秒）
+
+# STT (Speech-to-Text) 配置 - 使用 G1 原生 ASR
+stt:
+  type: "g1_stt"
+  params:
+    audio_subscribe_topic: "rt/audio_msg"
+
+# LLM 配置 - 使用 DeepSeek
+llm:
+  type: "deepseek"
+  params:
+    api_key: "${oc.env:DEEPSEEK_API_KEY}"
+    model: "deepseek-chat"
+
+# TTS (Text-to-Speech) 配置 - 使用 G1 原生 TTS
+tts:
+  type: "g1_tts"
+  params:
+    speaker_id: 0  # G1 说话人 ID
+
+# 函数调用配置
+functions:
+  enabled: true
+  enabled_groups:
+    - "calculator"  # 计算器函数组
+    # - "weather"   # 天气函数组（未来可添加）
+
+# 唤醒词配置
+wake_check:
+  enabled: true
+  wake_words:
+    - "你好"
+    - "你好, 小白"
+  idle_words:
+    - "再见"
+    - "拜拜"
+  wake_timeout: 30
+  audio:
+    # G1 不需要外部音频文件，可以使用 TTS 播放提示
+    wake_sound: null
+    idle_sound: null
+    volume: 0.8
+
+# 中断策略配置
+interruption_strategies:
+  - type: "keyword"
+    params:
+      keywords: ["小白小白", "停下"]
+  
+  - type: "min_words"
+    params:
+      min_words: 4
+
+# 系统提示词配置
+system_prompt: >
+  角色: 你是"小顽童", 你是一个有帮助的AI助手。
+  目标: 激发中小学生的好奇心，用生动、简单的语言解释知识，并提供积极的鼓励。
+  核心准则: 安全第一, 绝对禁止暴力、色情、危险行为等不当内容。
+  积极正向: 语言永远是鼓励、友善和乐观的。
+  启发式教学: 引导思考，解释方法，严禁直接给出作业答案。
+  互动风格: 语言简单易懂，回复不要过长, 不超过100个字符。鼓励孩子表达, 未知问题诚实承认"我需要查一下"，并转化为共同探索
+  你的输出会被转换为语音，所以不要在答案中包含特殊字符。
+
+# 欢迎消息配置
+welcome_message: "请向用户介绍你自己。"
+
+# Pipeline 配置
+pipeline:
+  enable_metrics: true
+  enable_usage_metrics: true
+  idle_timeout_secs: 300
+
+# 日志配置
+logging:
+  level: "INFO"
+  log_dir: "logs"
+
