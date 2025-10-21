@@ -162,7 +162,10 @@ async def main():
         },
     ]
 
-    # 创建唤醒词过滤器
+    # 创建过滤器
+    stt_mute_filter = ComponentFactory.create_stt_mute_filter(
+        config.get_stt_mute_config()
+    )
     hey_robot_filter = ComponentFactory.create_wake_check_filter(
         config.get_wake_check_config(), CURRENT_DIR
     )
@@ -176,9 +179,12 @@ async def main():
     # 构建 Pipeline
     pipeline_components = [
         transport.input(),
-        stt,
-        tl,
     ]
+
+    if stt_mute_filter is not None:
+        pipeline_components.append(stt_mute_filter)
+
+    pipeline_components.extend([stt, tl])
 
     # 如果启用了唤醒词过滤器，添加到 pipeline
     if hey_robot_filter is not None:

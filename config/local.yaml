@@ -14,6 +14,15 @@ transport:
       sample_rate: 16000
       stop_secs: 0.2
 
+stt_mute:
+  enabled: false
+  strategies:
+    # - "first_speech"
+    # - "mute_until_first_bot_complete"
+    # - "function_call"
+    - "always"
+    # - "custom"
+
 # STT (Speech-to-Text) 配置
 stt:
   type: "whisper"

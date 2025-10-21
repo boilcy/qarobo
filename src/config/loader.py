@@ -71,6 +71,9 @@ class ConfigLoader:
         """获取 TTS 配置"""
         return self.config.tts if self.config else OmegaConf.create({})
 
+    def get_stt_mute_config(self) -> DictConfig:
+        return self.config.stt_mute if self.config else OmegaConf.create({})
+
     def get_wake_check_config(self) -> DictConfig:
         """获取唤醒词配置"""
         return self.config.wake_check if self.config else OmegaConf.create({})

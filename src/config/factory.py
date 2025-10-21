@@ -18,6 +18,10 @@ from pipecat.transports.local.audio import (
     LocalAudioTransport,
     LocalAudioTransportParams,
 )
+from pipecat.processors.filters.stt_mute_filter import (
+    STTMuteConfig,
+    STTMuteFilter,
+)
 from pipecat.audio.interruptions.base_interruption_strategy import (
     BaseInterruptionStrategy,
 )
@@ -162,6 +166,17 @@ class ComponentFactory:
             )
         else:
             raise ValueError(f"Unsupported TTS type: {tts_type}")
+
+    @staticmethod
+    def create_stt_mute_filter(config: Dict[str, Any]):
+        if not config.get("enabled", False):
+            logger.info("STT Mute filter disabled")
+            return None
+        strategies = set(config.get("strategies", []))
+        stt_mute_config = STTMuteConfig(strategies=strategies)
+        logger.info(f"Creating stt mute filter: strategies = {strategies}")
+        stt_mute_filter = STTMuteFilter(config=stt_mute_config)
+        return stt_mute_filter
 
     @staticmethod
     def create_wake_check_filter(
